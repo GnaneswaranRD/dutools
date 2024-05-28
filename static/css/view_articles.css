@@ -1,0 +1,32 @@
+.main_container {
+    margin: 56px 0 0 0;
+}
+
+.head_container {
+    margin: 85px 0 0 0;
+}
+
+.options_section {
+    padding: 15px;
+    background-color: #988fc9;
+    border-radius: 11px;
+}
+
+.options_section .col {
+    text-align: center !important;
+}
+
+.data_sub_container {
+    padding: 20px;
+    background-color: lightgrey;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.truncate {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3; /* Number of lines to show */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

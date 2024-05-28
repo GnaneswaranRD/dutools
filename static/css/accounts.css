@@ -1,0 +1,71 @@
+.sub_section {
+    margin: 100px 0;
+    text-align: -webkit-center;
+}
+
+body {
+    background-color: whitesmoke;
+}
+  
+
+.login_box {
+    background-color: #afb0df;
+    width: 357px;
+    height: 330px;
+    border-radius: 15px;
+    box-shadow: 3px 1px 10px 4px grey;
+    transition: transform 0.5s;
+}
+.logo_image h1 {
+    font-weight: 600;
+    font-family: ui-monospace;
+}
+
+.logo_image {
+    padding: 20px;
+}
+
+.logo_image img {
+    width: 100px !important;
+    height: 100px !important;
+    margin: 20px 0 20px 0;
+}
+
+#submit {
+    border-radius: 13px;
+    color: white;
+    font-size: 16px;
+    background-color: #151c48;
+    padding: 5px 15px;
+    transition: transform 0.3s;
+    margin: 0px 10px 0px 0px;
+}
+
+#reg_btn {
+    border-radius: 13px;
+    color: white;
+    font-size: 16px;
+    background-color: #151c48;
+    padding: 5px 15px;
+    transition: transform 0.3s; 
+}
+
+#username {
+    border-radius: 6px;
+    border: 2px solid #151c48;
+    transition: transform 0.3s;
+}
+
+#password {
+    border-radius: 6px;
+    border: 2px solid #151c48;
+    transition: transform 0.3s;
+}
+
+#email {
+    border-radius: 6px;
+    border: 2px solid #151c48;
+    transition: transform 0.3s;
+}
+
+

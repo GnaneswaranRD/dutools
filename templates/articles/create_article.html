@@ -1,0 +1,117 @@
+{% extends "base.html" %} {% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static',path='/css/create_article.css')}}"
+/>
+{% endblock head %} {% block content %}
+<main class="main_container">
+  <section class="container">
+    <div class="head_container">
+      <div class="sub_container">
+        <div class="article_container">
+          <div class="mb-5" style="text-align: center">
+            <h2 style="font-weight: 600">Create Article</h2>
+          </div>
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              placeholder="Title"
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="author"
+              placeholder="Author"
+            />
+          </div>
+          <div class="mb-3">
+            <textarea
+              class="form-control"
+              id="content"
+              rows="3"
+              placeholder="Content"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <input
+              type="file"
+              class="form-control"
+              id="image"
+              name="image"
+              accept="image/*"
+              multiple
+            />
+          </div>
+          <div class="image-preview mb-3" id="imagePreview"></div>
+
+          <div class="mb-3" style="text-align: center">
+            <button id="submit" type="button" class="btn btn-primary">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+  const imageUpload = document.getElementById("image");
+  const imagePreview = document.getElementById("imagePreview");
+
+  imageUpload.addEventListener("change", function (event) {
+    imagePreview.innerHTML = "";
+    const files = event.target.files;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        imagePreview.appendChild(img);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  });
+
+  $(document).ready(function () {
+    $("#submit").click(function () {
+      var title = $("#title").val();
+      var author = $("#author").val();
+      var content = $("#content").val();
+      var image = $("#image").val();
+      console.log("image",image)
+
+      if (title && author && content && image) {
+        $.ajax({
+          url: "/api/upload_article/?title="+title+"&author="+author+"&content="+content+"&image="+image,
+          type: "POST",
+          success: function (data) {
+            if (data.status_code == 200) {
+                      window.location.href = "/view_articles"
+              }
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+      } else {
+        $(".msg").text("Please fill the all form fields");
+        $(".alert_container").addClass("show");
+        $(".alert_container").removeClass("hide");
+        $(".alert_container").addClass("showAlert");
+        setTimeout(function () {
+          $(".alert_container").removeClass("show");
+          $(".alert_container").addClass("hide");
+        }, 2000);
+      }
+    });
+  });
+</script>
+{% endblock content %}

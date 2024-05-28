@@ -1,0 +1,33 @@
+.main_container {
+    margin: 56px 0 0 0;
+}
+
+.head_container {
+    margin: 85px 0 0 0;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.image-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sub_container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.article_container {
+    padding: 35px;
+    background-color: #eaeaef;
+    border-radius: 16px;
+    box-shadow: 0px 0px 6px 0px;
+}

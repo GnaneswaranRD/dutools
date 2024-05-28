@@ -1,0 +1,73 @@
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.13
+    container_name: dutools_db
+    restart: always
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=${CLUSTER_NAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=false
+      - path.data=/usr/share/elasticsearch/data
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - "9200:9200"
+    networks:
+      - net
+
+  kibana:
+    image: kibana:7.17.13
+    container_name: kibana
+    restart: always
+    environment:
+      - node.name=kibana
+      - cluster.name=${CLUSTER_NAME}
+      - ELASTICSEARCH_HOSTS=http://dutools_db:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - enterpriseSearch.host=http://dutools_db:9200
+      - PATH_DATA=/usr/share/kibana/data
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - kb_data:/usr/share/kibana/data
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+    networks:
+      - net
+  
+  fastapi:
+    build:
+      context: .
+    container_name: dutools
+    volumes:
+      - .:/app
+    restart: always
+    ports:
+      - "8010:80"
+    networks:
+      - net
+    depends_on:
+      - elasticsearch
+
+volumes:
+  esdata:
+    driver: local
+  kb_data:
+    driver: local
+
+networks:
+  net:
+    driver: bridge

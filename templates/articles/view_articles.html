@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static',path='/css/view_articles.css')}}" />
+{% endblock head %}
+{% block content %}
+<main class="main_container">
+<section class="container">
+    <div class="head_container">
+        <div class="options_section">
+            <div class="row">
+                <div class="col">
+                    <button id="view_all_data" class="btn btn-outline-light">View All</button>
+                </div>
+                <div class="col">
+                    <button id="my_data" class="btn btn-outline-light">My Articles</button>
+                </div>
+                <div class="col">
+                    <button id="create_data" class="btn btn-outline-light">Create Article</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="data_main_container">
+
+        </div>
+    </div>
+</section>
+</main>
+<script>
+$(document).ready(function(){
+    function get_artices(view_all=true){
+        $.ajax({
+            url: "/api/view_article/?view_all="+view_all,
+            type: "GET",
+            success: function(data) {
+        console.log("typeeeeeeeee", typeof(data));
+        if (data && Array.isArray(data)) {
+            var html_element = "";
+            for (var i = 0; i < data.length; i++) { 
+                if (data[i]) { 
+                    console.log(data[i].title);
+                    html_element += `
+                    <div class="data_sub_container">
+                        <div class="row">
+                            <div class="col">
+                                <h2>${data[i].title}</h2>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col">
+                                <p>Author : <span style="font-weight: 600;font-style: italic;">${data[i].author}</span></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col truncate">
+                                ${data[i].content}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col" style="flex: 0 0 auto;width: 70%;">
+                                <a href="/api/view_article/${data[i].id}">View More</a>
+                            </div>
+                    `;
+
+                    if (view_all==false){
+                        html_element += `
+                            <div class="col" style="text-align:right;flex: 0 0 auto;width: 19%;">
+                                <a href="/api/delete_article/${data[i].id}">Delete article</a>
+                            </div>
+                            <div class="col" style="text-align:right;">
+                                <a href="/api/edit_artice/${data[i].id}">Edit article</a>
+                            </div>
+                        `;
+                    }
+                    html_element += `
+                    </div>
+                    </div>
+                    `
+                }
+            }
+            console.log(html_element);
+            $('#loading-screen').removeClass('hide').addClass('show');
+              setTimeout(() => {
+                $('#loading-screen').removeClass('show').addClass('hide');
+                    setTimeout(() => {
+                        $('.data_main_container').html(html_element); 
+                    }, 500); 
+                }, 1000);
+             
+            } 
+            else {
+                console.error('Invalid data structure', data);
+                $('#articles_container').html('<p>No articles found.</p>');
+            }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching articles', error);
+                $('#articles_container').html('<p>Error loading articles. Please try again later.</p>');
+            }
+            });
+        }
+
+
+
+    get_artices(view_all=true)
+
+    $("#view_all_data").click(function(){
+        get_artices(view_all=true)
+    });
+
+    $("#my_data").click(function(){
+        get_artices(view_all=false)
+    });
+
+    $("#create_data").click(function(){
+        $('#loading-screen').removeClass('hide').addClass('show');
+              setTimeout(() => {
+                $('#loading-screen').removeClass('show').addClass('hide');
+                    setTimeout(() => {
+                        window.location.href="/create_article"
+                    }, 500); 
+                }, 1000);
+        
+    });
+
+
+
+});
+</script>
+{% endblock content %}

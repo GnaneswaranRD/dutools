@@ -1,0 +1,163 @@
+{% extends "base.html" %} 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static',path='/css/accounts.css')}}" />
+{% endblock head %} 
+{% block content %}
+<div class="container main">
+  <div class="main_section">
+    <div class="sub_section">
+      <div class="login_box">
+        <div class="logo_image" id="button">
+          <h1>DU Tools</h1>
+        </div>
+        <div class="form">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="username"
+          /><br /><br />
+
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="password"
+          /><br /><br />
+
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="email"
+          /><br /><br />
+
+          <input type="submit" value="Register" id="submit" />
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+
+
+    $(".login_box").hover(
+      function () {
+        $(this).css({
+          transform: "perspective(500px) rotateX(2deg) rotateY(-2deg)",
+        });
+      },
+      function () {
+        $(this).css({
+          transform: "perspective(500px) rotateX(0deg) rotateY(0deg)",
+        });
+      }
+    );
+
+    $("#submit").hover(
+      function () {
+        $(this).css("transform", "scale(1.2)");
+      },
+      function () {
+        $(this).css("transform", "scale(1)");
+      }
+    );
+
+    $("#username").hover(
+      function () {
+        $(this).css("transform", "scale(1.2)");
+      },
+      function () {
+        $(this).css("transform", "scale(1)");
+      }
+    );
+
+    $("#password").hover(
+      function () {
+        $(this).css("transform", "scale(1.2)");
+      },
+      function () {
+        $(this).css("transform", "scale(1)");
+      }
+    );
+
+    $("#email").hover(
+      function () {
+        $(this).css("transform", "scale(1.2)");
+      },
+      function () {
+        $(this).css("transform", "scale(1)");
+      }
+    );
+
+    $("#reg_btn").hover(
+      function () {
+        $(this).css("transform", "scale(1.2)");
+      },
+      function () {
+        $(this).css("transform", "scale(1)");
+      }
+    );
+
+    $(".alert-close-btn").click(function () {
+      console.log("closeeeeeeeeee");
+      $(".alert_container").removeClass("show");
+      $(".alert_container").addClass("hide");
+      
+    });
+
+    $("#submit").click(function () {
+      var username = $("#username").val();
+      var password = $("#password").val();
+      var email = $("#email").val();
+      console.log("username", username);
+      console.log("password", password);
+      console.log("email", email);
+      if (username && password && email) {
+        $.ajax({
+          url: "/api/register/",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({
+                username: username,
+                password: password,
+                email: email
+            }),
+          success: function (data) {
+            console.log("data",data)
+            if (data.status_code == 200) {
+              $('#loading-screen').removeClass('hide').addClass('show');
+
+              setTimeout(() => {
+                $('#loading-screen').removeClass('show').addClass('hide');
+                    
+                    setTimeout(() => {
+                        window.location.href = "/login";
+                    }, 500); // Allow time for the hide animation to complete
+                }, 2000);
+            }
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR) {
+                console.log("error",jqXHR)
+              $(".msg").text(jqXHR.responseJSON.detail);
+              $(".alert_container").addClass("show");
+              $(".alert_container").removeClass("hide");
+              $(".alert_container").addClass("showAlert");
+              setTimeout(function () {
+                $(".alert_container").removeClass("show");
+                $(".alert_container").addClass("hide");
+              }, 2000);
+            }
+          },
+        });
+      } else {
+        alert("Fill the username and password");
+      }
+    });
+  });
+</script>
+{% endblock content %}
