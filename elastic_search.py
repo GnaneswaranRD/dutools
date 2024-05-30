@@ -21,9 +21,13 @@ class ElaseticQuery:
         print("pk_id", pk_id)
         objs = es.index(index=index, id=pk_id, body=body)
         return objs
+    
+    def edit_data(self,index,id,body):
+        objs = es.index(index=index, id=id, body=body)
+        return objs
 
     def delete_specific_data(self, index, body):
-        objs = es.delete_by_query(index=index, body=body)
+        objs = es.delete_by_query(index=index,body=body)
         return objs
 
     def search_query(self, index, body=None):

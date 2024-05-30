@@ -19,7 +19,6 @@ class Articles(BaseModel):
     title: str
     author: str
     content: str
-    image: str
     
     
 

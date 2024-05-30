@@ -1,0 +1,63 @@
+{% extends "base.html" %} 
+{% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static',path='/css/detail_article.css')}}"
+/>
+{% endblock head %} 
+{% block content %}
+<main class="main_container">
+  <section class="container">
+    <div class="head_container">
+        <div class="article_container">
+
+        </div>
+    </div>
+  </section>
+</main>
+<script>
+
+  $(document).ready(function () {
+
+    function view_article() {
+        $.ajax({
+          url: "/api/detail_article/{{article_id}}/",
+          type: "GET",
+          success: function (data) {
+            console.log("data",data)
+            if(data){
+                data = data[0]
+                html_element = `
+                <div class="row">
+                    <div class="col">
+                    <h1 style="font-weight: 600;">${data.title}</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                    <p>Author: <span style="color:blue;"><i>${data.author}</i><span></p>
+                    </div>
+                </div>
+                <br>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                    ${data.content}
+                    </div>
+                </div>
+                </div>
+                `
+                $('.article_container').html(html_element);
+            }
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+      }
+
+      view_article()
+
+  });
+</script>
+{% endblock content %}

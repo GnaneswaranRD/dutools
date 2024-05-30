@@ -51,3 +51,24 @@ async def create_article(request: Request,user: dict = Depends(get_current_user)
         )
     else:
         return RedirectResponse(url="/")
+    
+
+@template_router.get("/edit_article/{article_id}", response_class=HTMLResponse)
+async def edit_article(request: Request,article_id: int,user: dict = Depends(get_current_user)):
+    if user.get("user") != "none":
+        return templates.TemplateResponse(
+            "articles/edit_article.html", {"request": request,"user":user,"article_id":article_id}
+        )
+    else:
+        return RedirectResponse(url="/")
+    
+
+@template_router.get("/detail_article/{article_id}", response_class=HTMLResponse)
+async def detail_article(request: Request,article_id: int,user: dict = Depends(get_current_user)):
+    if user.get("user") != "none":
+        return templates.TemplateResponse(
+            "articles/detail_article.html", {"request": request,"user":user,"article_id":article_id}
+        )
+    else:
+        return RedirectResponse(url="/")
+    

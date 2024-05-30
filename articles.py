@@ -1,36 +1,27 @@
-from fastapi import APIRouter, HTTPException, Request, UploadFile
-from typing import List
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File
+from typing import List, Optional
 import logging
 import os
 import shutil
+from fastapi.responses import JSONResponse, RedirectResponse
 
 # own modules
 from models import Articles
 import settings
 from elastic_search import ElaseticQuery, es
 from decorators import login_required
+import time
 
 elasticquery = ElaseticQuery()
 
 articles_router = APIRouter()
 
 
-UPLOAD_DIR = "uploads"
-if not os.path.exists(UPLOAD_DIR):
-    os.makedirs(UPLOAD_DIR)
-
 
 @articles_router.post("/api/upload_article")
 @login_required
-def upload_article(
-    request: Request,
-    title: str,
-    author: str,
-    content: str,
-    image: UploadFile
-):
+def upload_article(request: Request, title: str, author: str, content: str):
 
-    image_path = os.path.join(UPLOAD_DIR, image.filename)
 
     user_id = int(request.session["user_id"])
 
@@ -39,11 +30,11 @@ def upload_article(
         title=title,
         author=author,
         content=content,
-        image=image_path,
     )
     # data = elasticquery.search_query(index="articles")
     # print("data", data)
     data = elasticquery.create_data(index="articles", body=article.dict())
+    time.sleep(1)
     return {"message": "Data uploaded successfully", "status_code": 200}
 
 
@@ -52,7 +43,27 @@ def upload_article(
 def view_article(request: Request, view_all: bool = False):
     result = []
     if view_all:
-        query = {"query": {"match_all": {}}}
+        try:
+            query = {"query": {"match_all": {}}}
+            article_obj = elasticquery.get_all_data(index="articles", body=query)
+            if article_obj:
+                for obj in list(article_obj):
+                    result.append(
+                        {
+                            "id": obj.get("_id"),
+                            "user_id": obj.get("_source").get("user_id"),
+                            "title": obj.get("_source").get("title"),
+                            "author": obj.get("_source").get("author"),
+                            "content": obj.get("_source").get("content"),
+                        }
+                    )
+        except Exception as e:
+            print("error", e)
+            raise HTTPException(status_code=400, detail="No article found")
+        return list(result)
+    user_id = int(request.session["user_id"])
+    try:
+        query = {"query": {"match": {"user_id": user_id}}}
         article_obj = elasticquery.get_all_data(index="articles", body=query)
         if article_obj:
             for obj in list(article_obj):
@@ -65,78 +76,62 @@ def view_article(request: Request, view_all: bool = False):
                         "content": obj.get("_source").get("content"),
                     }
                 )
-        return list(result)
-    user_id = int(request.session["user_id"])
-    query = {"query": {"match": {"user_id": user_id}}}
-    article_obj = elasticquery.get_all_data(index="articles", body=query)
-    if article_obj:
-        for obj in list(article_obj):
-            result.append(
-                {
-                    "id": obj.get("_id"),
-                    "user_id": obj.get("_source").get("user_id"),
-                    "title": obj.get("_source").get("title"),
-                    "author": obj.get("_source").get("author"),
-                    "content": obj.get("_source").get("content"),
-                }
-            )
-
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=400, detail="No article found")
     return list(result)
+
+
+@articles_router.get("/api/detail_article/{id}")
+@login_required
+def detail_article(request: Request, id: int):
+    query = {"query": {"match": {"_id": id}}}
+    article_obj = elasticquery.get_all_data(index="articles", body=query)
+
+    if not article_obj:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    result = []
+    for obj in list(article_obj):
+        result.append(
+            {
+                "id": obj.get("_id"),
+                "user_id": obj.get("_source").get("user_id"),
+                "title": obj.get("_source").get("title"),
+                "author": obj.get("_source").get("author"),
+                "content": obj.get("_source").get("content"),
+            }
+        )
+
+    return result
 
 
 @articles_router.put("/api/edit_article/{id}")
 @login_required
 def edit_article(
-    request: Request,
-    id: int,
-    title: str,
-    author: str,
-    content: str,
-    image: UploadFile,
+    request: Request, id: int, title: str, author: str, content: str
 ):
-    result = []
+    user_id = int(request.session.get("user_id"))
 
-    image_path = os.path.join(UPLOAD_DIR, image)
-
-    user_id = int(request.session["user_id"])
-    query = {"query": {"match": {"_id": id}}}
-    article_obj = elasticquery.get_all_data(index="articles", body=query)
-    if article_obj:
-        for obj in list(article_obj):
-            result.append(
-                {
-                    "id": obj.get("_id"),
-                    "user_id": obj.get("_source").get("user_id"),
-                    "title": obj.get("_source").get("title"),
-                    "author": obj.get("_source").get("author"),
-                    "content": obj.get("_source").get("content"),
-                }
-            )
-
-    print("result", result)
-
-    # article = Articles(
-    #     user_id=user_id,
-    #     title=title,
-    #     author=author,
-    #     content=content,
-    #     image=image_path,
-    # )
-    # # data = elasticquery.search_query(index="articles")
-    # # print("data", data)
-    # data = elasticquery.create_data(index="articles", body=article.dict())
-    # return {"message": "Data uploaded successfully","status_code":200}
-
-    return result
+    if not (title and author and content):
+        raise HTTPException(status_code=400, detail="Missing required fields")
 
 
-@articles_router.get("/api/test")
+    article = Articles(
+        user_id=user_id,
+        title=title,
+        author=author,
+        content=content,
+    )
+
+    data = elasticquery.edit_data(index="articles", id=id, body=article.dict())
+    return {"message": "Data updated successfully", "status_code": 200, "data": data}
+
+
+@articles_router.get("/api/delete_article/{id}")
 @login_required
-def test(request: Request):
-    return "Tested"
-
-
-@articles_router.get("/api/dashboard")
-@login_required
-def dashboard(request: Request):
-    return "Dashboard"
+def delete_article(request: Request, id: int):
+    body = {"query": {"match": {"_id": id}}}
+    data = elasticquery.delete_specific_data(index="articles", body=body)
+    time.sleep(1)
+    return RedirectResponse(url="/view_articles")
